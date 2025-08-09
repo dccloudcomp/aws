@@ -1,11 +1,6 @@
 async function listSummaries() {
   const { websiteEndpoint, resultsPrefix } = window.APP_CONFIG;
-  const prefix = `${resultsPrefix}/`;
 
-  // S3 Static Website no expone ListBucket; asumimos una "índice" básica escaneando por convención
-  // Estrategia simple: probamos a descubrir los últimos 10 subdirectorios mediante un archivo "index.json".
-  // Para MVP: el usuario puede pegar IDs o refrescar conocidos. Aquí implementamos un "descubridor" simple:
-  // -> Hacemos fetch de un archivo opcional "results/index.json" si existe.
   let indexUrl = `http://${websiteEndpoint}/${resultsPrefix}/index.json`;
   try {
     const res = await fetch(indexUrl);
@@ -14,8 +9,6 @@ async function listSummaries() {
       return ids; // array de upload_ids
     }
   } catch(e) { /* ignore */ }
-
-  // Si no hay índice, pedimos al usuario el ID manualmente
   return [];
 }
 
@@ -83,6 +76,4 @@ async function showRun(id) {
 }
 
 document.getElementById("refresh").addEventListener("click", refresh);
-
-// Primer render
 window.addEventListener("DOMContentLoaded", refresh);

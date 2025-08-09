@@ -1,45 +1,60 @@
 variable "aws_region" {
+  description = "Región AWS donde desplegar la infraestructura"
   type        = string
-  default     = "eu-west-1"
-  description = "AWS region"
 }
 
 variable "project_name" {
+  description = "Nombre base para los recursos"
   type        = string
-  default     = "sentiment-analysis-aws"
 }
 
 variable "ingest_bucket_name" {
+  description = "Nombre del bucket S3 para ingesta de CSV"
   type        = string
-  default     = null
-  description = "If null, it will be generated"
 }
 
 variable "website_bucket_name" {
+  description = "Nombre del bucket S3 para el frontend y resultados"
   type        = string
-  default     = null
-  description = "If null, it will be generated"
 }
 
 variable "hf_api_token" {
+  description = "Token de autenticación para Hugging Face API"
   type        = string
   sensitive   = true
-  description = "Hugging Face Inference API token (hf_...)"
 }
 
 variable "hf_model_id" {
+  description = "ID del modelo en Hugging Face"
   type        = string
   default     = "cardiffnlp/twitter-roberta-base-sentiment-latest"
-  description = "HF model to call for sentiment"
 }
 
 variable "results_prefix" {
+  description = "Prefijo en el bucket website donde guardar resultados"
   type        = string
   default     = "results"
 }
 
 variable "csv_suffix" {
+  description = "Sufijo de archivos CSV a procesar"
   type        = string
   default     = ".csv"
-  description = "Only trigger Lambda when files with this suffix are uploaded"
+}
+
+# ==== Variables para entorno sin permisos IAM ====
+variable "manage_iam" {
+  description = "Si es false, no crea roles ni políticas IAM y usa uno existente"
+  type        = bool
+  default     = false
+}
+
+variable "lambda_role_arn" {
+  description = "ARN de un rol IAM existente para la Lambda (si manage_iam=false)"
+  type        = string
+}
+
+variable "frontend_bucket_name" {
+  type        = string
+  description = "Nombre único para el bucket del frontend"
 }

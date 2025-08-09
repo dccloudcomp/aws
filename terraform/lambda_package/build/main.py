@@ -1,4 +1,4 @@
-import os, io, json, time, uuid, logging, csv
+import os, io, json, time, uuid, logging, csv, botocore
 from typing import List, Dict
 import boto3, requests
 
@@ -18,6 +18,7 @@ HF_URL = f"https://api-inference.huggingface.co/models/{HF_MODEL_ID}"
 HF_HEADERS = {"Authorization": f"Bearer {HF_API_TOKEN}"} if HF_API_TOKEN else {}
 
 TEXT_COLUMNS_CANDIDATES = ["text", "tweet", "content", "message", "body"]
+INDEX_KEY = f"{RESULTS_PREFIX}/index.json"
 
 def call_hf(text: str):
     payload = {"inputs": text}
@@ -71,6 +72,40 @@ def process_csv_streaming(bucket: str, key: str):
         records.append(row)
     return records
 
+def update_index(upload_id: str):
+    """Mantiene results/index.json como lista de upload_ids (últimos 100)."""
+    ids = []
+    try:
+        obj = s3.get_object(Bucket=WEBSITE_BUCKET, Key=INDEX_KEY)
+        data = obj["Body"].read().decode("utf-8", errors="ignore")
+        current = json.loads(data)
+        if isinstance(current, list):
+            ids = current
+    except botocore.exceptions.ClientError as e:
+        if e.response.get("Error", {}).get("Code") != "NoSuchKey":
+            # Si falta permiso GetObject u otro error, lo logeamos y seguimos (solo no habrá histórico)
+            logger.warning(f"No se pudo leer {INDEX_KEY}: {e}")
+
+    # Inserta al principio, quita duplicados preservando orden, limita a 100
+    new_ids = [upload_id] + ids
+    seen = set()
+    deduped = []
+    for x in new_ids:
+        if x in seen:
+            continue
+        seen.add(x)
+        deduped.append(x)
+        if len(deduped) >= 100:
+            break
+
+    s3.put_object(
+        Bucket=WEBSITE_BUCKET,
+        Key=INDEX_KEY,
+        Body=json.dumps(deduped, ensure_ascii=False).encode("utf-8"),
+        ContentType="application/json",
+        CacheControl="no-cache"
+    )
+
 def save_results(upload_id: str, records: List[Dict]):
     result_dir = f"{RESULTS_PREFIX}/{upload_id}"
     jsonl_key = f"{result_dir}/predictions.jsonl"
@@ -95,8 +130,12 @@ def save_results(upload_id: str, records: List[Dict]):
         Bucket=WEBSITE_BUCKET,
         Key=summary_key,
         Body=json.dumps(summary, ensure_ascii=False).encode("utf-8"),
-        ContentType="application/json"
+        ContentType="application/json",
+        CacheControl="no-cache"
     )
+
+    # Actualiza/crea el índice de runs
+    update_index(upload_id)
 
 def handler(event, context):
     logger.info("Event: %s", json.dumps(event))
