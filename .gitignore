@@ -1,0 +1,40 @@
+# === Terraform ===
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfplan
+*.tfvars
+*.tfvars.json
+
+# Mantener el lock de Terraform
+!.terraform.lock.hcl
+
+# === IDEs / Editores ===
+.vscode/
+.idea/
+*.swp
+
+# === SO específicos ===
+.DS_Store
+Thumbs.db
+
+# === Logs ===
+*.log
+
+# === Python ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+
+# === Node.js ===
+node_modules/
+
+# === General backups ===
+*.bak
+*.tmp
+*.temp
