@@ -3,16 +3,17 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 rm -rf dist build .venv
-mkdir -p dist build/python
+mkdir -p dist build
 
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 
-# Copiar dependencias al paquete
-cp -r .venv/lib/python*/site-packages/* build/python/ || true
-# Añadir tu código
+# Copia dependencias a la RAÍZ del paquete (no a build/python)
+cp -r .venv/lib/python*/site-packages/* build/
+
+# Añade tu código
 cp main.py build/
 
 cd build

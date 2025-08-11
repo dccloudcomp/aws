@@ -2,7 +2,11 @@
 // Usa los outputs "website_bucket" y "website_url" de Terraform
 
 window.APP_CONFIG = {
-  websiteBucket: "REPLACE_WITH_OUTPUT_website_bucket", // p.ej. mi-website-bucket-demo
+  websiteBucket: "tu-website-bucket-unico-1234", // p.ej. mi-website-bucket-demo
   resultsPrefix: "results",
-  websiteEndpoint: "REPLACE_WITH_OUTPUT_website_url"   // p.ej. mi-website-bucket-demo.s3-website-us-east-1.amazonaws.com
+  websiteEndpoint: "tu-website-bucket-unico-1234.s3-website-us-east-1.amazonaws.com"   // p.ej. mi-website-bucket-demo.s3-website-us-east-1.amazonaws.com
 };
+
+
+
+
